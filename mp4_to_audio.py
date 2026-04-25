@@ -25,8 +25,12 @@ def install_moviepy():
 def check_dependencies():
     """检查并安装依赖库"""
     try:
-        from moviepy.editor import VideoFileClip
-        return True
+        try:
+            from moviepy import VideoFileClip
+            return True
+        except ImportError:
+            from moviepy.editor import VideoFileClip
+            return True
     except ImportError:
         print("moviepy 库未安装")
         response = input("是否现在安装？(y/n): ").strip().lower()
@@ -35,6 +39,16 @@ def check_dependencies():
         else:
             print("请先安装 moviepy: pip install moviepy")
             return False
+
+
+def import_video_file_clip():
+    """导入 VideoFileClip，兼容新旧版本 moviepy"""
+    try:
+        from moviepy import VideoFileClip
+        return VideoFileClip
+    except ImportError:
+        from moviepy.editor import VideoFileClip
+        return VideoFileClip
 
 
 def convert_mp4_to_audio(input_file, output_file=None, audio_format='mp3'):
@@ -57,7 +71,7 @@ def convert_mp4_to_audio(input_file, output_file=None, audio_format='mp3'):
             base_name = os.path.splitext(input_file)[0]
             output_file = f"{base_name}.{audio_format}"
         
-        from moviepy.editor import VideoFileClip
+        VideoFileClip = import_video_file_clip()
         
         print(f"正在处理视频: {input_file}")
         print(f"输出音频: {output_file}")
